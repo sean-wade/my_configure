@@ -1,0 +1,214 @@
+{
+    "terminal.integrated.inheritEnv": false,
+    "workbench.iconTheme": "material-icon-theme",
+    "C_Cpp.intelliSenseCacheSize": 512,
+    "editor.bracketPairColorization.enabled": true,
+    "editor.guides.bracketPairs": "active",
+    "cmake.configureOnOpen": true,
+    "security.workspace.trust.untrustedFiles": "open",
+    "files.associations": {
+        "*.txt": "csv (whitespace)"
+    },
+    "stack.chickenArray": [
+        "000968",
+        "004752",
+        "005693",
+        "001629",
+        "001237",
+        "008887",
+        "000041",
+        "001691",
+        "004347",
+        "000008",
+        "118001",
+    ],
+    "fund-watch.favorites": [
+        "000968",
+        "004752",
+        "005693",
+        "001629",
+        "001237",
+        "008887",
+        "000041",
+        "001691",
+        "004347",
+        "000008",
+        "118001",
+    ],
+    "fund-watch.interval": 120,
+    "terminal.integrated.fontSize": 12,
+
+    "fileheader.customMade": {
+        "Author": "zhanghao", // 改成你的名字
+        "LastEditTime": "Do not edit",
+        "FilePath": "Do not edit",
+        "LastEditors": "zhanghao", // 文件最后编辑者
+        "Description": "",
+    },
+    "fileheader.cursorMode": {
+        "description":"",
+        "param": "",
+        "return": "",
+        // "author":"zhanghao"
+    },
+    "fileheader.configObj": {
+
+        "createFileTime": true,
+        "language": {
+            "languagetest": {
+                "head": "/$$",
+                "middle": " $ @",
+                "end": " $/",
+                "functionSymbol": {
+                    "head": "/** ",
+                    "middle": " * @",
+                    "end": " */"
+                },
+                "functionParams": "js"
+            },
+            "h/hpp/cpp": {
+                "head": "/* ",
+                "middle": " * @",
+                "end": " */"
+              },
+        },
+        "autoAdd": true,
+        "autoAddLine": 100,
+        "autoAlready": true,
+        "annotationStr": {
+            "head": "/*",
+            "middle": " * @",
+            "end": " */",
+            "use": false
+        },
+        "headInsertLine": {
+            "php": 2,
+            "sh": 2
+        },
+        "beforeAnnotation": {
+            "文件后缀": "该文件后缀的头部注释之前添加某些内容"
+        },
+        "afterAnnotation": {
+            "文件后缀": "该文件后缀的头部注释之后添加某些内容"
+        },
+        "specialOptions": {
+            "特殊字段": "自定义比如LastEditTime/LastEditors"
+        },
+        "switch": {
+            "newlineAddAnnotation": true
+        },
+        "supportAutoLanguage": [],
+        "prohibitAutoAdd": [
+            "json"
+        ],
+        "folderBlacklist": [
+            "node_modules",
+            "文件夹禁止自动添加头部注释"
+        ],
+        "prohibitItemAutoAdd": [
+            "项目的全称, 整个项目禁止自动添加头部注释, 可以使用快捷键添加"
+        ],
+        "moveCursor": true,
+        "dateFormat": "YYYY-MM-DD HH:mm:ss",
+        "atSymbol": [
+            "@",
+            "@"
+        ],
+        "atSymbolObj": {
+            "文件后缀": [
+                "头部注释@符号",
+                "函数注释@符号"
+            ]
+        },
+        "colon": [
+            ": ",
+            ": "
+        ],
+        "colonObj": {
+            "文件后缀": [
+                "头部注释冒号",
+                "函数注释冒号"
+            ]
+        },
+        "filePathColon": "路径分隔符替换",
+        "showErrorMessage": false,
+        "writeLog": false,
+        "wideSame": false,
+        "wideNum": 13,
+        "functionWideNum": 0,
+        "CheckFileChange": false,
+        "createHeader": true,
+        "useWorker": false,
+        "designAddHead": false,
+        "headDesignName": "random",
+        "headDesign": false,
+        "cursorModeInternalAll": {},
+        "openFunctionParamsCheck": true,
+        "functionParamsShape": [
+            "{",
+            "}"
+        ],
+        "functionBlankSpaceAll": {},
+        "functionTypeSymbol": "*",
+        "typeParamOrder": "type param",
+        "customHasHeadEnd": {},
+        "throttleTime": 60000,
+        "functionParamAddStr": "",
+        "NoMatchParams": "no show param"
+    },
+    "remote.SSH.remotePlatform": {
+        "SG_dev": "linux",
+        "ZC_dev": "linux"
+    },
+    "workbench.colorTheme": "Ayu Dark Bordered",
+    "editor.fontSize": 14,
+    "cmake.format.allowOptionalArgumentIndentation": true,
+    "VSCodeCounter.include": [
+        "**/*",
+        "src/include",
+        "include",
+        "src/detection/include",
+        "src/tracking/include"
+    ],
+    "indentRainbow.colors": [
+    
+        "rgba(255,255,64,0.07)",
+        "rgba(127,255,127,0.07)",
+        "rgba(255,127,255,0.07)",
+        "rgba(79,236,236,0.07)"
+    ],
+    "notebook.lineNumbers": "on",
+    "markdown.preview.fontSize": 14,
+    // "editor.detectIndentation": false,
+
+
+    "emmet.excludeLanguages": [
+        "markdown"
+    ],
+    // vscode默认启用了根据文件类型自动设置tabsize的选项
+    "editor.detectIndentation": true,
+    // // 重新设定tabsize
+    "editor.tabSize": 4,
+    "extensions.ignoreRecommendations": true,
+    "python.pythonPath": "/usr/bin/python",
+    "vsicons.dontShowNewVersionMessage": true,
+    "clang-format.style": "Google",
+    // 每次保存的时候自动格式化 
+    "editor.formatOnSave": true,
+    "[cpp]": {
+        "editor.quickSuggestions": true,
+        "editor.defaultFormatter": "ms-vscode.cpptools"
+    },
+    "window.zoomLevel": 0.2,
+    "editor.mouseWheelZoom": true,
+    "explorer.confirmDragAndDrop": false,
+    "clang-format.fallbackStyle": "Google",
+    "explorer.confirmDelete": false,
+    "editor.minimap.enabled": false,
+    "editor.renderControlCharacters": false,
+    "breadcrumbs.enabled": true,
+    // 下面两个是clang风格，单行代码太长会自动跨行，且左大括号在上面,若不喜欢，注释以下两行
+    // "C_Cpp.clang_format_style": "{ BasedOnStyle: LLVM, UseTab: Never, IndentWidth: 4, TabWidth: 4, BreakBeforeBraces: Allman, SpaceAfterTemplateKeyword: true, SpaceBeforeAssignmentOperators: true, SpacesBeforeTrailingComments: 1, AlignConsecutiveMacros: true, AlignConsecutiveDeclarations: true, BinPackParameters: false, AlignAfterOpenBracket: AlwaysBreak, AlwaysBreakTemplateDeclarations: true, AfterEnum: true, AfterFunction: true, AfterStruct: true}",
+    // "C_Cpp.clang_format_fallbackStyle": "{ BasedOnStyle: LLVM, UseTab: Never, IndentWidth: 4, TabWidth: 4, BreakBeforeBraces: Allman, SpaceAfterTemplateKeyword: true, SpaceBeforeAssignmentOperators: true, SpacesBeforeTrailingComments: 1, AlignConsecutiveMacros: true, AlignConsecutiveDeclarations: true, BinPackParameters: false, AlignAfterOpenBracket: AlwaysBreak, AlwaysBreakTemplateDeclarations: true, AfterEnum: true, AfterFunction: true, AfterStruct: true}",
+
+}
