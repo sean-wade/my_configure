@@ -33,13 +33,13 @@ AllowShortBlocksOnASingleLine: true
 AllowShortCaseLabelsOnASingleLine: true
 
 # 允许短的函数放在同一行: None, InlineOnly(定义在类中), Empty(空函数), Inline(定义在类中，空函数), All
-AllowShortFunctionsOnASingleLine: None
+AllowShortFunctionsOnASingleLine: false
 
 # 允许短的if语句保持在同一行
-AllowShortIfStatementsOnASingleLine: true
+AllowShortIfStatementsOnASingleLine: false
 
 # 允许短的循环保持在同一行
-AllowShortLoopsOnASingleLine: true
+AllowShortLoopsOnASingleLine: false
 
 # 总是在返回类型后换行: None, All, TopLevel(顶级函数，不包括在类中的函数),
 # AllDefinitions(所有的定义，不包括声明), TopLevelDefinitions(所有的顶级函数的定义)
@@ -108,7 +108,7 @@ BreakConstructorInitializers: AfterColon
 BreakStringLiterals: false
 
 # 每行字符的限制，0表示没有限制
-ColumnLimit: 100
+ColumnLimit: 120
 
 CompactNamespaces: true
 
@@ -213,4 +213,5 @@ TabWidth: 4
 
 # 使用tab字符: Never, ForIndentation, ForContinuationAndIndentation, Always
 UseTab: Never
+
 
