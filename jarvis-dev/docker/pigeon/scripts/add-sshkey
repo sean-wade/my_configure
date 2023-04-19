@@ -1,0 +1,14 @@
+#!/bin/bash
+
+pubkey=$(whiptail --title "OpenSSH install wizard" --inputbox "Input public key: (Try find in host ~/.ssh/id_*.pub)" 10 80 3>&1 1>&2 2>&3)
+exitstatus=$?
+if [ $exitstatus = 0 ]; then
+    mkdir -p ~/.ssh
+    echo $pubkey >> $HOME/.ssh/authorized_keys
+    chmod 0700 $HOME/.ssh
+    chmod 0600 $HOME/.ssh/authorized_keys
+    # Restart sshd
+    service ssh restart
+else
+    echo "User cancelled public key import."
+fi

@@ -1,0 +1,10 @@
+# Only support docker standard shell command
+# Copy this file and rename to custom_run_args.conf to apply
+
+# Example
+# Add local folder: "--volume=$HOME/my_folder:/opt/my_volume"
+# Add docker volume: "--volume=volume_name:/opt/my_volume"
+
+CUSTOM_RUN_ARGS=(
+    "--volume=cifs_public:/mnt/public"
+)

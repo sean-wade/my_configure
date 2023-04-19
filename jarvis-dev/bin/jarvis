@@ -1,0 +1,268 @@
+#!/bin/bash
+
+WS_DIR=$(cd "$(dirname "$0")/.." && pwd)
+GIT_VER=$(git -C $WS_DIR rev-parse --short HEAD)$([[ -z $(git -C $WS_DIR status -s) ]] || echo -dirty)
+
+CONTAINER_NAME="jarvis_dev"
+DATA_VOLUME_NAME="jarvis_home"
+MEDIA_VOLUME_NAME="jarvis_media"
+
+function log_info {
+    echo -e "[\e[1;32mINFO\e[0m] $1"
+}
+
+function log_warn {
+    echo -e "[\e[1;33mWARN\e[0m] $1"
+}
+
+function log_error {
+    echo -e "[\e[1;31mERROR\e[0m] $1"
+}
+
+function assert {
+    if [ $? -ne 0 ]; then
+        log_error "$2, code $1"
+        exit $1
+    fi
+}
+
+function platform_check {
+    X86_IMAGE_NAME="nexus.cambricon.com/jarvis-auto-docker/jarvis-dev:0.1.5"
+    PIGEON_IMAGE_NAME="nexus.cambricon.com/jarvis-auto-docker/jarvis-dev:0.0.1-pigeon"
+    IMAGE_NAME=""
+    PLATFORM_CONF=""
+
+    # Get platform
+    if [ -f /sys/devices/soc0/soc_id ]; then
+        # Cambricon SoC
+        PLATFORM=$(cat /sys/devices/soc0/soc_id)
+    else
+        # Generic x86
+        PLATFORM="IPC"
+    fi
+
+    # Get platform env
+    if [ "$PLATFORM" == "IPC" ]; then
+        IMAGE_NAME=$X86_IMAGE_NAME
+        PLATFORM_CONF="x86_run_args.conf"
+    elif [ "$PLATFORM" == "SD5223" ]; then
+        IMAGE_NAME=$PIGEON_IMAGE_NAME
+        PLATFORM_CONF="pigeon_run_args.conf"
+    else
+        log_error "Unsupport platform: $PLATFORM"
+    fi
+
+    # Show banner
+    echo -e "\e[33m"
+    echo -e "       ██╗ █████╗ ██████╗ ██╗   ██╗██╗███████╗"
+    echo -e "       ██║██╔══██╗██╔══██╗██║   ██║██║██╔════╝"
+    echo -e "       ██║███████║██████╔╝██║   ██║██║███████╗"
+    echo -e "  ██   ██║██╔══██║██╔══██╗╚██╗ ██╔╝██║╚════██║"
+    echo -e "  ╚█████╔╝██║  ██║██║  ██║ ╚████╔╝ ██║███████║"
+    echo -e "   ╚════╝ ╚═╝  ╚═╝╚═╝  ╚═╝  ╚═══╝  ╚═╝╚══════╝"
+    echo -e "\e[32m"
+    echo -e "Launcher version: $GIT_VER"
+    echo -e "Image version: $IMAGE_NAME"
+    echo -e "\e[0m"
+}
+
+function docker_create {
+    # Create data volume
+    has_volume=$(docker volume ls | grep $DATA_VOLUME_NAME)
+    if [ -z "$has_volume" ]; then
+        log_info "Create data volume..."
+        docker volume create $DATA_VOLUME_NAME >/dev/null
+        assert $? "Volume create failed"
+    else
+        log_info "Using existing data volume"
+    fi
+
+    # Create media volume (for USB disk mount)
+    has_volume=$(docker volume ls | grep $MEDIA_VOLUME_NAME)
+    if [ -z "$has_volume" ]; then
+        log_info "Create media volume..."
+        docker volume create $MEDIA_VOLUME_NAME >/dev/null
+        assert $? "Volume create failed"
+    else
+        log_info "Using existing media volume"
+    fi
+
+    log_info "Create container..."
+
+    # Detect GPU runtime
+    has_nvidia_docker=$(docker info | grep Runtimes | grep nvidia)
+    if [ -n "$has_nvidia_docker" ]; then
+        nvidia_device="--gpus=all"
+        nvidia_capabilities="--env=NVIDIA_DRIVER_CAPABILITIES=all"
+    fi
+
+    # Import platform args
+    if [ -f $WS_DIR/config/$PLATFORM_CONF ]; then
+        source $WS_DIR/config/$PLATFORM_CONF
+    fi
+
+    # Import custom args
+    if [ -f $WS_DIR/config/custom_run_args.conf ]; then
+        source $WS_DIR/config/custom_run_args.conf
+    fi
+
+    # Create container
+    docker run \
+        --name=$CONTAINER_NAME \
+        --network=host \
+        --volume=$DATA_VOLUME_NAME:/root \
+        --volume=$MEDIA_VOLUME_NAME:/media \
+        --interactive \
+        --detach \
+        ${PLATFORM_RUN_ARGS[*]} \
+        ${CUSTOM_RUN_ARGS[*]} \
+        $nvidia_device \
+        $nvidia_capabilities \
+        $IMAGE_NAME
+
+    assert $? "Container create failed"
+}
+
+function docker_run {
+    # Try create container
+    has_jarvis=$(docker ps -a | awk {'print $NF'} | grep $CONTAINER_NAME)
+    if [ -z "$has_jarvis" ]; then
+        docker_create
+    fi
+
+    # Try start container
+    is_running=$(docker ps | awk {'print $NF'} | grep $CONTAINER_NAME)
+    if [ -z "$is_running" ]; then
+        docker start $CONTAINER_NAME >/dev/null
+        assert $? "Container start failed"
+    fi
+
+    # Run package check on firstboot
+    if [[ -z "$has_jarvis" || -z "$is_running" ]]; then
+        docker exec -it $CONTAINER_NAME jarvis_pkg
+    fi
+
+    # Enable localhost x11 forwarding
+    xhost + >/dev/null 2>&1
+
+    # Enter terminal
+    log_info "Enter container terminal..."
+    docker exec \
+        --env=DISPLAY=$DISPLAY \
+        --interactive \
+        --tty \
+        $CONTAINER_NAME zsh
+}
+
+function docker_stop {
+    log_info "Stopping container..."
+    docker stop $CONTAINER_NAME >/dev/null
+    assert $? "Container stop failed"
+}
+
+function docker_remove {
+    # Try stop container
+    if [ -n "$(docker ps | awk {'print $NF'} | grep $CONTAINER_NAME)" ]; then
+        docker_stop
+    fi
+
+    log_info "Delete container..."
+    docker rm $CONTAINER_NAME >/dev/null
+    assert $? "Container remove failed"
+}
+
+function docker_remove_volume {
+    if (whiptail --title "WARNING" --yesno "All data in /root will be REMOVED!" 10 60); then
+        log_info "Delete volume..."
+        docker volume rm $DATA_VOLUME_NAME >/dev/null
+        docker volume rm $MEDIA_VOLUME_NAME >/dev/null
+        assert $? "Volume remove failed"
+    else
+        log_info "User cancelled"
+    fi
+}
+
+function docker_update {
+    # Try delete container
+    if [ -n "$(docker ps -a | awk {'print $NF'} | grep $CONTAINER_NAME)" ]; then
+        docker_remove
+    fi
+
+    log_info "Updating jarvis development..."
+    cd $WS_DIR && git pull
+    assert $? "Jarvis development update failed"
+}
+
+function docker_ssh_open {
+    log_info "Starting SSH service..."
+    docker exec $CONTAINER_NAME service ssh start
+    assert $? "SSH service exec failed"
+}
+
+function docker_ssh_key {
+    docker exec -it $CONTAINER_NAME add-sshkey
+    assert $? "SSH add key failed"
+}
+
+function docker_mount {
+    while read partition; do
+        menulist="$menulist $partition Disk"
+    done <<<$(ls /dev/disk/by-id | egrep '^ata-' | grep part)
+
+    diskname=$(whiptail --noitem --title "Disk List" --menu "Choose a mount disk:" 12 80 4 $menulist 3>&1 1>&2 2>&3)
+    assert $? "User canceled"
+
+    log_warn "This function need sudo permission"
+    DEV_DISK=/dev/disk/by-id/$diskname
+    sudo umount /var/lib/docker/volumes/jarvis_media/_data >/dev/null 2>&1
+    sudo mount $DEV_DISK /var/lib/docker/volumes/jarvis_media/_data
+    assert $? "Mount $DEV_DISK failed"
+    log_info "Mounted, use \e[1mjarvis umount\e[0m to safety remove the disk"
+}
+
+function docker_umount {
+    log_warn "This function need sudo permission"
+    sudo umount /var/lib/docker/volumes/jarvis_media/_data
+    assert $? "Remove storage device failed"
+    log_info "Please wait data write complete..."
+    sync
+    log_info "You can safety remove the disk now"
+}
+
+clear
+platform_check
+
+if [ "$1" == "run" ]; then
+    docker_run
+elif [ "$1" == "restart" ]; then
+    docker_stop
+    docker_run
+elif [ "$1" == "stop" ]; then
+    docker_stop
+elif [ "$1" == "remove" ]; then
+    docker_remove
+elif [ "$1" == "purge" ]; then
+    docker_remove_volume
+elif [ "$1" == "update" ]; then
+    docker_update
+elif [ "$1" == "sshopen" ]; then
+    docker_ssh_open
+elif [ "$1" == "sshkey" ]; then
+    docker_ssh_key
+elif [ "$1" == "mount" ]; then
+    docker_mount
+elif [ "$1" == "umount" ]; then
+    docker_umount
+else
+    log_info "run       - Create or run container"
+    log_info "restart   - Restart container"
+    log_info "stop      - Stop container"
+    log_info "remove    - Delete container without persistent volume"
+    log_info "purge     - Delete persistent volume"
+    log_info "update    - Pull latest docker image and recreate container"
+    log_info "sshopen   - Start ssh service on port 30022"
+    log_info "sshkey    - Append ssh authorized key to the container"
+    log_info "mount     - Mount a usb disk to the container"
+    log_info "umount    - Safety remove a usb disk"
+    log_info "help      - show this content"
+fi
